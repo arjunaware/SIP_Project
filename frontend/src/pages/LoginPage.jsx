@@ -1,3 +1,4 @@
+// src/pages/LoginPage.jsx
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -10,24 +11,28 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
 
+  // ✅ FIX: always accept the event and call preventDefault first
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault()          // ← This one line stops the browser from
+                                //   sending its own GET request
     setError('')
+
     if (!form.email || !form.password) {
       setError('All fields are required')
       return
     }
+
     setLoading(true)
     try {
-      const data = await authService.login(form)
-      login({
-        userId: data.userId,
-        name: data.name,
-        email: data.email,
-        passbookId: data.passbookId,
-      }, data.token)
+      const data = await authService.login(form)   // ← Now axios.post() actually runs
+      login(
+        { userId: data.userId, name: data.name, email: data.email, passbookId: data.passbookId },
+        data.token
+      )
       navigate('/dashboard')
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password')
@@ -39,7 +44,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
             <span className="text-white font-bold text-2xl">S</span>
@@ -55,6 +59,7 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* ✅ onSubmit on the <form> tag — NOT onClick on the button */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="label">Email address</label>
@@ -65,6 +70,7 @@ export default function LoginPage() {
                 onChange={handleChange}
                 className="input-field"
                 placeholder="you@example.com"
+                required
               />
             </div>
 
@@ -77,9 +83,11 @@ export default function LoginPage() {
                 onChange={handleChange}
                 className="input-field"
                 placeholder="••••••••"
+                required
               />
             </div>
 
+            {/* ✅ type="submit" — triggers onSubmit above */}
             <button
               type="submit"
               disabled={loading}

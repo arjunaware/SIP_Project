@@ -26,6 +26,8 @@ public class SipController {
     @Autowired private SipService sipService;
     @Autowired private DashboardService dashboardService;
 
+    // ── Create ────────────────────────────────────────────────────────
+
     @PostMapping("/sip/create")
     @Operation(summary = "Create a new SIP")
     public ResponseEntity<SipDto.SipResponse> createSip(
@@ -34,6 +36,8 @@ public class SipController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(sipService.createSip(request, userDetails.getUsername()));
     }
+
+    // ── Read ──────────────────────────────────────────────────────────
 
     @GetMapping("/sip/all")
     @Operation(summary = "Get all SIPs for the authenticated user")
@@ -51,9 +55,27 @@ public class SipController {
     }
 
     @GetMapping("/dashboard")
-    @Operation(summary = "Get dashboard summary: totalContribution, totalInterest, currentAmount, all SIPs")
+    @Operation(summary = "Dashboard summary")
     public ResponseEntity<DashboardDto> getDashboard(
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(dashboardService.getDashboard(userDetails.getUsername()));
+    }
+
+    // ── Pause / Resume ────────────────────────────────────────────────
+
+    @PutMapping("/sip/{sipId}/pause")
+    @Operation(summary = "Pause an active SIP — stops scheduler from executing it")
+    public ResponseEntity<SipDto.SipResponse> pauseSip(
+            @PathVariable Long sipId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(sipService.pauseSip(sipId, userDetails.getUsername()));
+    }
+
+    @PutMapping("/sip/{sipId}/resume")
+    @Operation(summary = "Resume a paused SIP — continues from remaining installments")
+    public ResponseEntity<SipDto.SipResponse> resumeSip(
+            @PathVariable Long sipId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(sipService.resumeSip(sipId, userDetails.getUsername()));
     }
 }

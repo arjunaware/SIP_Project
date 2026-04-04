@@ -20,4 +20,15 @@ export const sipService = {
     const res = await api.post('/sip/create', data)
     return res.data
   },
+
+  // ── Pause / Resume ──────────────────────────────────────────────────
+  async pauseSip(id) {
+    const res = await api.put(`/sip/${id}/pause`)
+    return res.data
+  },
+
+  async resumeSip(id) {
+    const res = await api.put(`/sip/${id}/resume`)
+    return res.data
+  },
 }

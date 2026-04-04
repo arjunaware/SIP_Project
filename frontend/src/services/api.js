@@ -1,11 +1,11 @@
+// src/services/api.js
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: '/api',                          // Vite proxy handles this in dev
   headers: { 'Content-Type': 'application/json' },
 })
 
-// Attach JWT to every request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -17,7 +17,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Handle 401 globally — redirect to login
 api.interceptors.response.use(
   (response) => response,
   (error) => {

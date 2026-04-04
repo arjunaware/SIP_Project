@@ -35,6 +35,29 @@ public class Sip {
     @Column(name = "total_installments", nullable = false)
     private Integer totalInstallments;
 
+    // ─── Tracking fields (updated after every transaction) ───────────
+    @Column(name = "completed_installments", nullable = false)
+    @Builder.Default
+    private Integer completedInstallments = 0;
+
+    // Computed: totalInstallments - completedInstallments
+    // Stored for fast dashboard queries without recalculation
+    @Column(name = "remaining_installments", nullable = false)
+    @Builder.Default
+    private Integer remainingInstallments = 0;
+
+    // ─── Scheduling ───────────────────────────────────────────────────
+    /**
+     * The date on which the next transaction should be executed.
+     * Set on SIP creation = startDate.
+     * Updated after every successful execution = prev + frequency gap.
+     * Set to null when SIP is COMPLETED.
+     * NOT updated while SIP is PAUSED (so resume knows where it left off).
+     */
+    @Column(name = "next_execution_date")
+    private LocalDate nextExecutionDate;
+
+    // ─── Interest ─────────────────────────────────────────────────────
     @Column(name = "interest_rate", nullable = false, precision = 5, scale = 2)
     private BigDecimal interestRate;
 
@@ -44,14 +67,24 @@ public class Sip {
     @Column(name = "is_sip", nullable = false)
     private Boolean isSip;
 
+    // ─── Dates ────────────────────────────────────────────────────────
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
+    // ─── Status ───────────────────────────────────────────────────────
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
     private SipStatus status = SipStatus.ACTIVE;
 
+    // ─── Audit ────────────────────────────────────────────────────────
+    @Column(name = "paused_at")
+    private LocalDate pausedAt;
+
+    @Column(name = "resumed_at")
+    private LocalDate resumedAt;
+
+    // ─── Relations ────────────────────────────────────────────────────
     @OneToMany(mappedBy = "sip", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Transaction> transactions;
 }

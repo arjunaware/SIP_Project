@@ -123,6 +123,7 @@ export default function CreateSipPage() {
               <div>
                 <label className="label">Frequency <span className="text-red-400">*</span></label>
                 <select name="frequency" value={form.frequency} onChange={handleChange} className="input-field">
+{/*                   <option value="TEST">TEST</option> */}
                   <option value="DAILY">Daily</option>
                   <option value="WEEKLY">Weekly</option>
                   <option value="MONTHLY">Monthly</option>
